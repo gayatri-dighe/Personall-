@@ -1,0 +1,116 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+
+#define BUFFER_SIZE 1024
+
+int main()
+{
+    int pipe1[2]; // Parent to Child (carries pathname)
+    int pipe2[2]; // Child to Parent (carries file contents)
+
+    pid_t pid;
+
+    char pathname[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE];
+
+    ssize_t n;
+
+    // Create the first pipe (Parent -> Child)
+    if (pipe(pipe1) == -1)
+    {
+        perror("Pipe 1 creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Create the second pipe (Child -> Parent)
+    if (pipe(pipe2) == -1)
+    {
+        perror("Pipe 2 creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork the child process
+    pid = fork();
+
+    if (pid < 0)
+    {
+        perror("Fork failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0)
+    {
+        // Parent Process
+        close(pipe1[0]); // Close unused read end of Pipe 1
+        close(pipe2[1]); // Close unused write end of Pipe 2
+
+        printf("Enter the file pathname to send to child: ");
+
+        if (fgets(pathname, BUFFER_SIZE, stdin) != NULL)
+        {
+            // Remove trailing newline if present
+            pathname[strcspn(pathname, "\n")] = 0;
+
+            // Write pathname to Pipe 1
+            write(pipe1[1], pathname, strlen(pathname) + 1);
+        }
+
+        close(pipe1[1]); // Finished writing pathname
+
+        // Read file contents from Pipe 2 and display on standard output
+        printf("\n--- Contents received from Child ---\n");
+
+        while ((n = read(pipe2[0], buffer, BUFFER_SIZE)) > 0)
+        {
+            write(STDOUT_FILENO, buffer, n);
+        }
+
+        close(pipe2[0]);
+
+        wait(NULL); // Wait for child to finish
+    }
+    else
+    {
+        // Child Process
+        close(pipe1[1]); // Close unused write end of Pipe 1
+        close(pipe2[0]); // Close unused read end of Pipe 2
+
+        // Read pathname from Pipe 1
+        n = read(pipe1[0], pathname, BUFFER_SIZE);
+
+        close(pipe1[0]); // Finished reading pathname
+
+        if (n > 0)
+        {
+            // Open the requested file
+            int fd = open(pathname, O_RDONLY);
+
+            if (fd < 0)
+            {
+                char *err_msg = "Error: Could not open the specified file.\n";
+                write(pipe2[1], err_msg, strlen(err_msg));
+            }
+            else
+            {
+                // Read contents of the file and write to Pipe 2
+                while ((n = read(fd, buffer, BUFFER_SIZE)) > 0)
+                {
+                    write(pipe2[1], buffer, n);
+                }
+
+                close(fd);
+            }
+        }
+
+        close(pipe2[1]); // Finished writing file contents
+
+        exit(EXIT_SUCCESS);
+    }
+
+    return 0;
+}

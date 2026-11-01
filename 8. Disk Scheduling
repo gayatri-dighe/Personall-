@@ -1,0 +1,56 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int ReadyQueue[100], i, n;
+    int TotalHeadMoment = 0, initial;
+    int count = 0, AvgTotalHeadMoment;
+
+    printf("Enter the Total No. of Requests: ");
+    scanf("%d", &n);
+
+    printf("Enter Request sequence: ");
+
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &ReadyQueue[i]);
+    }
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &initial);
+
+    while (count != n)
+    {
+        int min = 1000, diff, index = -1;
+
+        for (i = 0; i < n; i++)
+        {
+            if (ReadyQueue[i] != -1)
+            {
+                diff = abs(ReadyQueue[i] - initial);
+
+                if (min > diff)
+                {
+                    min = diff;
+                    index = i;
+                }
+            }
+        }
+
+        TotalHeadMoment = TotalHeadMoment + min;
+        initial = ReadyQueue[index];
+        ReadyQueue[index] = -1;
+
+        count++;
+    }
+
+    printf("Total head movement is %d", TotalHeadMoment);
+
+    AvgTotalHeadMoment = TotalHeadMoment / n;
+
+    printf("\nAverage Total head movement is %d", AvgTotalHeadMoment);
+
+    return 0;
+}

@@ -1,0 +1,157 @@
+FIFO1 Sender program
+
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
+#define FIFO1 "fifo1"
+#define FIFO2 "fifo2"
+
+int main()
+{
+    char buf[100] = {0}, buf1[100] = {0};
+    int fd, fd1, i = 0;
+    char str;
+
+    printf("\nEnter the string (press # to finish):\n");
+
+    while ((str = getchar()) != '#' && i < 98)
+    {
+        buf[i++] = str;
+    }
+
+    buf[i] = '\0';
+
+    puts(buf);
+
+    mkfifo(FIFO1, 0666);
+
+    fd = open(FIFO1, O_WRONLY);
+    write(fd, buf, strlen(buf) + 1);
+
+    printf("\nMessage sent");
+    close(fd);
+
+    fd1 = open(FIFO2, O_RDONLY);
+    read(fd1, buf1, sizeof(buf1) - 1);
+
+    buf1[99] = '\0';
+
+    printf("\n\nMessage received\n");
+    printf("%s\n", buf1);
+
+    close(fd1);
+
+    return 0;
+}
+
+
+
+FIFO2 Receiver Program
+
+
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
+#define FIFO1 "fifo1"
+#define FIFO2 "fifo2"
+
+int main()
+{
+    char buf[100] = {0}, buf1[100] = {0};
+    int fd, fd1, words = 0, lines = 1;
+    int characters = 0, i, count = 0;
+    char ch;
+    FILE *fp;
+
+    fd = open(FIFO1, O_RDONLY);
+
+    read(fd, buf, sizeof(buf) - 1);
+
+    printf("\nMessage received\n");
+    printf("%s\n", buf);
+
+    close(fd);
+
+    for (i = 0; buf[i] != '\0'; i++)
+    {
+        if (buf[i] != ' ' && buf[i] != '\n' && buf[i] != '\t')
+        {
+            characters++;
+        }
+
+        if (buf[i] == ' ' || buf[i] == '\n' || buf[i] == '\t')
+        {
+            if (i > 0 && buf[i - 1] != ' ' &&
+                buf[i - 1] != '\n' && buf[i - 1] != '\t')
+            {
+                words++;
+            }
+        }
+
+        if (buf[i] == '\n')
+        {
+            lines++;
+        }
+    }
+
+    if (i > 0 && buf[i - 1] != ' ' &&
+        buf[i - 1] != '\n' && buf[i - 1] != '\t')
+    {
+        words++;
+    }
+
+    printf("\nCounts are:\n");
+    printf("Characters: %d\n", characters);
+    printf("Words: %d\n", words);
+    printf("Lines: %d\n", lines);
+
+    fp = fopen("f.txt", "w+");
+
+    fprintf(fp, "\nCharacters: %d", characters);
+    fprintf(fp, "\nWords: %d", words);
+    fprintf(fp, "\nLines: %d\n", lines);
+
+    fclose(fp);
+
+    fp = fopen("f.txt", "r");
+
+    i = 0;
+
+    while ((ch = fgetc(fp)) != EOF && i < 99)
+    {
+        buf1[i] = ch;
+        i++;
+    }
+
+    buf1[i] = '\0';
+
+    printf("\nBuffer contents:\n");
+    printf("%s\n", buf1);
+
+    fclose(fp);
+
+    unlink(FIFO1);
+
+    mkfifo(FIFO2, 0666);
+
+    fd1 = open(FIFO2, O_WRONLY);
+
+    write(fd1, buf1, strlen(buf1) + 1);
+
+    printf("\nMessage sent\n");
+
+    close(fd1);
+
+    return 0;
+}

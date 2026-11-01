@@ -1,111 +1,116 @@
-echo "1. Create Address Book"
-echo "2. View Address Book"
-echo "3. Insert Record"
-echo "4. Search Record"
-echo "5. Delete Record"
-echo "6. Modify Record"
-echo "7. Exit"
+while true
+do
+    echo "1. Create Address Book"
+    echo "2. View Address Book"
+    echo "3. Insert Record"
+    echo "4. Search Record"
+    echo "5. Delete Record"
+    echo "6. Modify Record"
+    echo "7. Exit"
 
-echo -n "Enter Your Choice: "
-read ch
+    echo -n "Enter Your Choice: "
+    read ch
 
-book="address_book.txt"
+    book="address_book.txt"
 
-case $ch in
+    case $ch in
 
-    1)
-        if [ -f "$book" ]; then
-            echo "$book is already created"
-        else
-            touch "$book"
-            echo "$book created successfully"
-        fi
-        ;;
-
-    2)
-        cat "$book"
-        ;;
-
-    3)
-        while true
-        do
-            echo "Enter name of student:"
-            read name
-
-            echo "Enter phone_no of student:"
-            read phone_no
-
-            echo "Enter email of student:"
-            read email
-
-            echo "$name | $phone_no | $email" >> "$book"
-
-            echo "Record inserted"
-
-            echo "Do you want to enter another record? (y/n)"
-            read choice
-
-            if [ "$choice" != "y" ]; then
-                break
+        1)
+            if [ -f "$book" ]; then
+                echo "$book is already created"
+            else
+                touch "$book"
+                echo "$book created successfully"
             fi
-        done
-        ;;
+            ;;
 
-    4)
-        if [ -f "$book" ]; then
-            echo "Enter the name you want to search:"
+        2)
+            cat "$book"
+            ;;
+
+        3)
+            while true
+            do
+                echo "Enter name of student:"
+                read name
+
+                echo "Enter phone_no of student:"
+                read phone_no
+
+                echo "Enter email of student:"
+                read email
+
+                echo "$name | $phone_no | $email" >> "$book"
+
+                echo "Record inserted"
+
+                echo "Do you want to enter another record? (y/n)"
+                read choice
+
+                if [ "$choice" != "y" ]; then
+                    break
+                fi
+            done
+            ;;
+
+        4)
+            if [ -f "$book" ]; then
+                echo "Enter the name you want to search:"
+                read name
+
+                grep -i "$name" "$book"
+            else
+                echo "Address book not found"
+            fi
+            ;;
+
+        5)
+            if [ -f "$book" ]; then
+                echo "Enter exact mobile no or name to delete the record:"
+                read phone_no
+
+                grep -iv "$phone_no" "$book" > temp.txt
+                mv temp.txt "$book"
+
+                echo "Record deleted successfully"
+            else
+                echo "Address book not found"
+            fi
+            ;;
+
+        6)
+            echo "Enter name to modify:"
             read name
 
-            grep -i "$name" "$book"
-        else
-            echo "Address book not found"
-        fi
-        ;;
+            if grep -i "$name" "$book"; then
+                echo "Enter new phone_no:"
+                read phone_no
 
-    5)
-        if [ -f "$book" ]; then
-            echo "Enter exact mobile no or name to delete the record:"
-            read phone_no
+                echo "Enter new email:"
+                read email
 
-            grep -iv "$phone_no" "$book" > temp.txt
-            mv temp.txt "$book"
+                grep -iv "$name" "$book" > temp.txt
 
-            echo "Record deleted successfully"
-        else
-            echo "Address book not found"
-        fi
-        ;;
+                echo "$name | $phone_no | $email" >> temp.txt
 
-    6)
-        echo "Enter name to modify:"
-        read name
+                mv temp.txt "$book"
 
-        if grep -i "$name" "$book"; then
-            echo "Enter new phone_no:"
-            read phone_no
+                echo "Record modified successfully"
+            else
+                echo "Record not found"
+            fi
+            ;;
 
-            echo "Enter new email:"
-            read email
+        7)
+            echo "Exiting Address Book..."
+            exit 0
+            ;;
 
-            grep -iv "$name" "$book" > temp.txt
+        *)
+            echo "Invalid Choice"
+            ;;
 
-            echo "$name | $phone_no | $email" >> temp.txt
+    esac
 
-            mv temp.txt "$book"
-
-            echo "Record modified successfully"
-        else
-            echo "Record not found"
-        fi
-        ;;
-
-    7)
-        echo "Exiting Address Book..."
-        exit 0
-        ;;
-
-    *)
-        echo "Invalid Choice"
-        ;;
-
-esac
+    echo ""
+done

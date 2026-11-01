@@ -1,0 +1,84 @@
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+void ascending(int arr[], int n)
+{
+    int i, j, temp;
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            if (arr[i] > arr[j])
+            {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+void descending(int arr[], int n)
+{
+    int i, j, temp;
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            if (arr[i] < arr[j])
+            {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+int main()
+{
+    int a[50], n, i, pid;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    printf("Enter elements:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    pid = fork();
+
+    if (pid < 0)
+    {
+        printf("Process creation failed\n");
+    }
+    else if (pid == 0)
+    {
+        printf("\nChild Process Created.\n");
+        printf("Child PID = %d\n", getpid());
+        printf("Parent PID = %d\n", getppid());
+
+        ascending(a, n);
+
+        exit(0);
+    }
+    else
+    {
+        printf("\nParent Process.\n");
+        printf("Parent PID = %d\n", getpid());
+        printf("Child PID = %d\n", pid);
+
+        //wait(NULL);
+        sleep(50);
+
+        descending(a, n);
+    }
+
+    return 0;
+}

@@ -1,3 +1,6 @@
+
+#!/bin/bash
+
 while true
 do
     echo "1. Create Address Book"
@@ -25,32 +28,40 @@ do
             ;;
 
         2)
-            cat "$book"
+            if [ -f "$book" ]; then
+                cat "$book"
+            else
+                echo "Address book not found"
+            fi
             ;;
 
         3)
-            while true
-            do
-                echo "Enter name of student:"
-                read name
+            if [ -f "$book" ]; then
+                while true
+                do
+                    echo "Enter name of student:"
+                    read name
 
-                echo "Enter phone_no of student:"
-                read phone_no
+                    echo "Enter phone_no of student:"
+                    read phone_no
 
-                echo "Enter email of student:"
-                read email
+                    echo "Enter email of student:"
+                    read email
 
-                echo "$name | $phone_no | $email" >> "$book"
+                    echo "$name | $phone_no | $email" >> "$book"
 
-                echo "Record inserted"
+                    echo "Record inserted"
 
-                echo "Do you want to enter another record? (y/n)"
-                read choice
+                    echo "Do you want to enter another record? (y/n)"
+                    read choice
 
-                if [ "$choice" != "y" ]; then
-                    break
-                fi
-            done
+                    if [ "$choice" != "y" ]; then
+                        break
+                    fi
+                done
+            else
+                echo "Address book not found. Please create it first."
+            fi
             ;;
 
         4)
@@ -59,6 +70,10 @@ do
                 read name
 
                 grep -i "$name" "$book"
+
+                if [ $? -ne 0 ]; then
+                    echo "Record not found"
+                fi
             else
                 echo "Address book not found"
             fi
@@ -79,25 +94,29 @@ do
             ;;
 
         6)
-            echo "Enter name to modify:"
-            read name
+            if [ -f "$book" ]; then
+                echo "Enter name to modify:"
+                read name
 
-            if grep -i "$name" "$book"; then
-                echo "Enter new phone_no:"
-                read phone_no
+                if grep -i "$name" "$book"; then
+                    echo "Enter new phone_no:"
+                    read phone_no
 
-                echo "Enter new email:"
-                read email
+                    echo "Enter new email:"
+                    read email
 
-                grep -iv "$name" "$book" > temp.txt
+                    grep -iv "$name" "$book" > temp.txt
 
-                echo "$name | $phone_no | $email" >> temp.txt
+                    echo "$name | $phone_no | $email" >> temp.txt
 
-                mv temp.txt "$book"
+                    mv temp.txt "$book"
 
-                echo "Record modified successfully"
+                    echo "Record modified successfully"
+                else
+                    echo "Record not found"
+                fi
             else
-                echo "Record not found"
+                echo "Address book not found"
             fi
             ;;
 
@@ -113,4 +132,5 @@ do
     esac
 
     echo ""
+
 done

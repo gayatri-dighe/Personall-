@@ -1,0 +1,122 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int ReadyQueue[100], n, head, disk_size;
+    int TotalHeadMoment = 0;
+    int i, j, temp;
+    int direction;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter the disk size: ");
+    scanf("%d", &disk_size);
+
+    printf("Enter the request sequence:\n");
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &ReadyQueue[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("Enter direction (0 for left, 1 for right): ");
+    scanf("%d", &direction);
+
+    // Sort the request queue
+    for (i = 0; i < n - 1; i++)
+    {
+        for (j = 0; j < n - i - 1; j++)
+        {
+            if (ReadyQueue[j] > ReadyQueue[j + 1])
+            {
+                temp = ReadyQueue[j];
+                ReadyQueue[j] = ReadyQueue[j + 1];
+                ReadyQueue[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nSeek Sequence: %d", head);
+
+    // Move towards right
+    if (direction == 1)
+    {
+        for (i = 0; i < n; i++)
+        {
+            if (ReadyQueue[i] >= head)
+            {
+                TotalHeadMoment += abs(ReadyQueue[i] - head);
+                head = ReadyQueue[i];
+                printf(" -> %d", head);
+            }
+        }
+
+        // Move to the last cylinder
+        TotalHeadMoment += abs((disk_size - 1) - head);
+        head = disk_size - 1;
+        printf(" -> %d", head);
+
+        // Reverse direction and service remaining requests
+        for (i = n - 1; i >= 0; i--)
+        {
+            if (ReadyQueue[i] < head &&
+                ReadyQueue[i] < disk_size - 1)
+            {
+                TotalHeadMoment += abs(ReadyQueue[i] - head);
+                head = ReadyQueue[i];
+                printf(" -> %d", head);
+            }
+        }
+    }
+    // Move towards left
+    else
+    {
+        for (i = n - 1; i >= 0; i--)
+        {
+            if (ReadyQueue[i] <= head)
+            {
+                TotalHeadMoment += abs(ReadyQueue[i] - head);
+                head = ReadyQueue[i];
+                printf(" -> %d", head);
+            }
+        }
+
+        // Move to the first cylinder
+        TotalHeadMoment += abs(head - 0);
+        head = 0;
+        printf(" -> %d", head);
+
+        // Reverse direction and service remaining requests
+        for (i = 0; i < n; i++)
+        {
+            if (ReadyQueue[i] > head)
+            {
+                TotalHeadMoment += abs(ReadyQueue[i] - head);
+                head = ReadyQueue[i];
+                printf(" -> %d", head);
+            }
+        }
+    }
+
+    printf("\nTotal Head Movement: %d", TotalHeadMoment);
+
+    return 0;
+}
+
+
+
+
+
+
+
+Enter the number of requests: 8
+Enter the disk size: 200
+Enter the request sequence:
+98 183 37 122 14 124 65 67
+Enter initial head position: 53
+Enter direction (0 for left, 1 for right): 1

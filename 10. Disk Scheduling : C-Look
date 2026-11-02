@@ -1,0 +1,73 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int ReadyQueue[100], n, head;
+    int TotalHeadMoment = 0;
+    int i, j, temp;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter the request sequence:\n");
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &ReadyQueue[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    // Sort the request queue
+    for (i = 0; i < n - 1; i++)
+    {
+        for (j = 0; j < n - i - 1; j++)
+        {
+            if (ReadyQueue[j] > ReadyQueue[j + 1])
+            {
+                temp = ReadyQueue[j];
+                ReadyQueue[j] = ReadyQueue[j + 1];
+                ReadyQueue[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nSeek Sequence: %d", head);
+
+    // Service requests greater than or equal to head
+    for (i = 0; i < n; i++)
+    {
+        if (ReadyQueue[i] >= head)
+        {
+            TotalHeadMoment += abs(ReadyQueue[i] - head);
+            head = ReadyQueue[i];
+            printf(" -> %d", head);
+        }
+    }
+
+    // Jump to the first request
+    for (i = 0; i < n; i++)
+    {
+        if (ReadyQueue[i] < head)
+        {
+            TotalHeadMoment += abs(ReadyQueue[i] - head);
+            head = ReadyQueue[i];
+            printf(" -> %d", head);
+        }
+    }
+
+    printf("\nTotal Head Movement: %d", TotalHeadMoment);
+
+    return 0;
+}
+
+
+
+
+
+Enter the number of requests: 8
+Enter the request sequence:
+98 183 37 122 14 124 65 67
+Enter initial head position: 53
